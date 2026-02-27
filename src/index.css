@@ -3,14 +3,19 @@
 :root {
   --primary: #6366f1;
   --primary-hover: #4f46e5;
-  --bg-dark: #0f172a;
+  --bg-dark: #7a2121;
+  /* Maroon background */
   --bg-card: rgba(30, 41, 59, 0.7);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent: #38bdf8;
+  --text-main: #2d2d2d;
+  --text-muted: #6b7280;
+  --accent: #f59e0b;
+  /* Orange accent */
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   --sidebar-width: 260px;
+  --maroon: #7a2121;
+  --orange: #f59e0b;
+  --white: #ffffff;
 }
 
 * {
@@ -28,7 +33,10 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: 'Outfit', sans-serif;
 }
 
