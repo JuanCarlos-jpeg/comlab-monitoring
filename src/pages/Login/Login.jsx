@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useAuth } from '../../AuthContext';
 import { Mail, Eye, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
-
+import bgImage from '../../assets/images/Mapua White Background 1.png';
+import logoImage from '../../assets/images/Mapua Library Logo 2.png';
 const LoginPage = () => {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
     const [isStudent, setIsStudent] = useState(true);
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
 
     const handleSubmit = (e) => {
@@ -32,7 +34,9 @@ const LoginPage = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'var(--maroon)',
+            backgroundImage: `url(${bgImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             fontFamily: 'Inter, sans-serif'
         }}>
             <motion.div
@@ -164,20 +168,43 @@ const LoginPage = () => {
                 </div>
 
                 {/* Right Side - Branding */}
-                <div style={{ flex: 1, backgroundColor: 'var(--orange)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                <div style={{
+                    flex: 1,
+                    backgroundColor: 'var(--orange)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    padding: '2rem',
+                    textAlign: 'center'
+                }}>
                     <div style={{
-                        width: '240px',
-                        height: '240px',
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        marginBottom: 'auto',
+                        marginTop: '2rem'
+                    }}>
+                        Brought to you by Mapua Library Services
+                    </div>
+
+                    <div style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: 'rgba(0,0,0,0.4)' // Dark grey placeholder logo
+                        margin: 'auto'
                     }}>
-                        {/* Vite Logo placeholder as requested */}
-                        <svg viewBox="0 0 410 404" width="180" height="180" fill="currentColor">
-                            <path d="M373.5 33L205 343L36.5 33L81 33L205 259L329 33L373.5 33Z" />
-                            <path d="M410 33L235 33L205 88L175 33L0 33L205 404L410 33Z" />
-                        </svg>
+                        <img src={logoImage} alt="Mapua Logo" width="375" height="375" />
+                    </div>
+
+                    <div style={{
+                        fontSize: '0.75rem',
+                        color: 'rgba(0, 0, 0, 0.5)',
+                        marginTop: 'auto',
+                        marginBottom: '1rem'
+                    }}>
+                        All rights reserved to Group 7, ITS120L CM2
                     </div>
                 </div>
             </motion.div>
