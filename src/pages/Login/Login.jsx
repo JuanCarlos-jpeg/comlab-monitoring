@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../../AuthContext';
-import { Mail, Eye, Info } from 'lucide-react';
+import { Mail, Eye, Info, User, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import bgImage from '../../assets/images/Mapua White Background 1.png';
 import logoImage from '../../assets/images/Mapua Library Logo 2.png';
+
 const LoginPage = () => {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
@@ -43,23 +44,32 @@ const LoginPage = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 style={{
-                    width: '900px',
-                    height: '560px',
+                    width: '950px',
+                    height: '580px',
                     display: 'flex',
-                    backgroundColor: 'white',
-                    borderRadius: '40px',
+                    borderRadius: '24px',
                     overflow: 'hidden',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)'
                 }}
             >
-                {/* Left Side - Login Form */}
-                <div style={{ flex: 1, padding: '4rem 3.5rem', display: 'flex', flexDirection: 'column' }}>
+                {/* Left Side - Black with 60% Opacity */}
+                <div style={{
+                    flex: 1.2,
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    padding: '4rem 4rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    color: 'white'
+                }}>
+                    {/* Left Side - Black with 60% Opacity */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3rem' }}>
-                        <div style={{ width: '24px', height: '24px', backgroundColor: 'var(--orange)', transform: 'rotate(45deg)', borderRadius: '4px' }}></div>
-                        <span style={{ fontWeight: 600, fontSize: '1.25rem', color: '#1a1a1a' }}>Library Usage</span>
+                        <div style={{ width: '5px', height: '5px', backgroundColor: '#ffffffff', transform: 'rotate(45deg)', borderRadius: '4px' }}></div>
+                        <span style={{ fontWeight: 600, fontSize: '1.25rem', color: 'white', letterSpacing: '1px' }}>  LIBRARY USAGE</span>
                     </div>
 
-                    <h1 style={{ fontSize: '1.75rem', fontWeight: 600, marginBottom: '2.5rem', color: '#1a1a1a' }}>Log In to Access Facility</h1>
+                    <h1 style={{ fontSize: '1.75rem', fontWeight: 600, marginBottom: '2.5rem', color: 'white' }}>Log In to Access Facility</h1>
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                         <div style={{ position: 'relative' }}>
@@ -67,10 +77,11 @@ const LoginPage = () => {
                                 position: 'absolute',
                                 top: '-10px',
                                 left: '12px',
-                                backgroundColor: 'white',
-                                padding: '0 4px',
+                                backgroundColor: '#1a1a1a',
+                                padding: '0 8px',
                                 fontSize: '0.8rem',
-                                color: 'var(--text-muted)',
+                                color: '#9ca3af',
+                                borderRadius: '4px',
                                 zIndex: 1
                             }}>ID</label>
                             <input
@@ -81,29 +92,31 @@ const LoginPage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '14px 44px 14px 16px',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '6px',
+                                    backgroundColor: 'transparent',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
                                     fontSize: '1rem',
-                                    color: '#1a1a1a',
+                                    color: 'white',
                                     outline: 'none'
                                 }}
                             />
-                            <Mail size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#d1d5db' }} />
+                            <User size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
                         </div>
 
-                        <div style={{ position: 'relative', opacity: isStudent ? 0.5 : 1 }}>
+                        <div style={{ position: 'relative', opacity: isStudent ? 0.4 : 1, transition: 'opacity 0.3s' }}>
                             <label style={{
                                 position: 'absolute',
                                 top: '-10px',
                                 left: '12px',
-                                backgroundColor: 'white',
-                                padding: '0 4px',
+                                backgroundColor: '#1a1a1a',
+                                padding: '0 8px',
                                 fontSize: '0.8rem',
-                                color: 'var(--text-muted)',
+                                color: '#9ca3af',
+                                borderRadius: '4px',
                                 zIndex: 1
                             }}>Password</label>
                             <input
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="••••••••••••"
                                 value={password}
                                 disabled={isStudent}
@@ -111,29 +124,36 @@ const LoginPage = () => {
                                 style={{
                                     width: '100%',
                                     padding: '14px 44px 14px 16px',
-                                    border: '1px solid #d1d5db',
-                                    borderRadius: '6px',
+                                    backgroundColor: 'transparent',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
                                     fontSize: '1rem',
-                                    color: '#1a1a1a',
-                                    outline: 'none',
-                                    backgroundColor: isStudent ? '#f9fafb' : 'white'
+                                    color: 'white',
+                                    outline: 'none'
                                 }}
                             />
-                            <Eye size={18} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#d1d5db' }} />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={isStudent}
+                                style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#6b7280', cursor: isStudent ? 'default' : 'pointer' }}
+                            >
+                                <Eye size={18} />
+                            </button>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1px' }}>
+                        <div style={{ display: 'flex', gap: '2px', marginTop: '0.5rem' }}>
                             <button
                                 type="submit"
                                 style={{
-                                    flex: 1,
-                                    backgroundColor: 'var(--orange)',
+                                    flex: 1.2,
+                                    backgroundColor: '#dc2626',
                                     color: 'white',
                                     padding: '14px',
                                     border: 'none',
-                                    borderRadius: '6px 0 0 6px',
+                                    borderRadius: '8px 0 0 8px',
                                     fontWeight: 600,
-                                    fontSize: '0.9rem',
+                                    fontSize: '0.95rem',
                                     cursor: 'pointer',
                                     textTransform: 'uppercase'
                                 }}
@@ -145,11 +165,11 @@ const LoginPage = () => {
                                 onClick={toggleRole}
                                 style={{
                                     flex: 1,
-                                    backgroundColor: 'var(--maroon)',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                     color: 'white',
                                     padding: '14px',
-                                    border: 'none',
-                                    borderRadius: '0 6px 6px 0',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '0 8px 8px 0',
                                     fontWeight: 600,
                                     fontSize: '0.9rem',
                                     cursor: 'pointer',
@@ -161,30 +181,32 @@ const LoginPage = () => {
                         </div>
                     </form>
 
-                    <div style={{ marginTop: 'auto', display: 'flex', gap: '4px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    <div style={{ marginTop: 'auto', display: 'flex', gap: '4px', fontSize: '0.85rem', color: '#9ca3af' }}>
                         <span>No account?</span>
-                        <a href="#" style={{ color: 'var(--maroon)', textDecoration: 'underline', fontWeight: 500 }}>Contact an admin</a>
+                        <a href="#" style={{ color: '#dc2626', textDecoration: 'underline', fontWeight: 500 }}>Contact an admin</a>
                     </div>
                 </div>
 
-                {/* Right Side - Branding */}
+                {/* Right Side - Red with 80% Opacity */}
                 <div style={{
                     flex: 1,
-                    backgroundColor: 'var(--orange)',
+                    backgroundColor: 'rgba(185, 28, 28, 0.8)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
                     padding: '2rem',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    color: 'white'
                 }}>
                     <div style={{
-                        fontSize: '1rem',
+                        fontSize: '1.1rem',
                         fontWeight: 600,
-                        color: 'rgba(0, 0, 0, 0.6)',
+                        color: 'rgba(255, 255, 255, 0.9)',
                         marginBottom: 'auto',
-                        marginTop: '2rem'
+                        marginTop: '2rem',
+                        letterSpacing: '1px'
                     }}>
                         Brought to you by Mapua Library Services
                     </div>
@@ -195,16 +217,24 @@ const LoginPage = () => {
                         justifyContent: 'center',
                         margin: 'auto'
                     }}>
-                        <img src={logoImage} alt="Mapua Logo" width="375" height="375" />
+                        <img
+                            src={logoImage}
+                            alt="Mapua Logo"
+                            width="375"
+                            height="375"
+                        />
                     </div>
 
                     <div style={{
-                        fontSize: '0.75rem',
-                        color: 'rgba(0, 0, 0, 0.5)',
+                        fontSize: '0.85rem',
+                        color: 'rgba(255, 255, 255, 0.7)',
                         marginTop: 'auto',
-                        marginBottom: '1rem'
+                        marginBottom: '1rem',
+                        lineHeight: 1.6
                     }}>
                         All rights reserved to Group 7, ITS120L CM2
+                        <br />
+                        © 2026 Mapua University
                     </div>
                 </div>
             </motion.div>

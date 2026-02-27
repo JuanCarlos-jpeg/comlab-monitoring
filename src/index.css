@@ -1,20 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --bg-dark: #7a2121;
-  /* Maroon background */
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --text-main: #2d2d2d;
-  --text-muted: #6b7280;
-  --accent: #f59e0b;
-  /* Orange accent */
+  --primary: #dc2626;
+  /* Cardinal Red */
+  --primary-hover: #b91c1c;
+  --bg-dark: #000000;
+  --bg-card: rgba(26, 26, 26, 0.9);
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --accent: #facc15;
+  /* Mapua Gold */
   --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
   --sidebar-width: 260px;
-  --maroon: #7a2121;
-  --orange: #f59e0b;
+  --cardinal-red: #dc2626;
+  --mapua-gold: #facc15;
+  --dark-grey: #1a1a1a;
   --white: #ffffff;
 }
 
