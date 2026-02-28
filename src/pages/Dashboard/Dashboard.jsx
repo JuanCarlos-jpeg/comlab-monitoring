@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, FileInput, FileOutput, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import FullPageBackground from '../../components/Layout/FullPageBackground';
 
 const DashboardPage = () => {
     const navigate = useNavigate();
@@ -13,73 +14,108 @@ const DashboardPage = () => {
     ];
 
     return (
-        <div>
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Dashboard</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Overview of your analytics and system status.</p>
-            </div>
+        <FullPageBackground>
+            <div>
+                <div style={{ marginBottom: '2.5rem' }}>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                        Dashboard
+                    </h1>
+                    <p style={{ color: 'var(--text-muted)' }}>
+                        Overview of your analytics and system status.
+                    </p>
+                </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                {navButtons.map((btn, index) => (
-                    <motion.div
-                        key={btn.path}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="glass-card"
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                        gap: '1.5rem',
+                        marginBottom: '3rem'
+                    }}
+                >
+                    {navButtons.map((btn, index) => (
+                        <motion.div
+                            key={btn.path}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="glass-card"
+                            style={{
+                                padding: '1.5rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '1rem',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                transition: 'transform 0.3s ease'
+                            }}
+                            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                            onClick={() => navigate(btn.path)}
+                        >
+                            <div
+                                style={{
+                                    width: '48px',
+                                    height: '48px',
+                                    borderRadius: '12px',
+                                    backgroundColor: `${btn.color}20`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: btn.color,
+                                    marginBottom: '0.5rem'
+                                }}
+                            >
+                                <btn.icon size={24} />
+                            </div>
+
+                            <div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                                    {btn.label}
+                                </h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                    Quick access to {btn.label.toLowerCase()} tools.
+                                </p>
+                            </div>
+
+                            <div
+                                style={{
+                                    marginTop: 'auto',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 600,
+                                    color: btn.color
+                                }}
+                            >
+                                <span>Open Page</span>
+                                <ArrowRight size={14} />
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+
+                <div className="glass-card" style={{ padding: '2rem' }}>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
+                        Recent Analytics
+                    </h2>
+                    <div
                         style={{
-                            padding: '1.5rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '1rem',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            transition: 'transform 0.3s ease'
-                        }}
-                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
-                        onClick={() => navigate(btn.path)}
-                    >
-                        <div style={{
-                            width: '48px',
-                            height: '48px',
-                            borderRadius: '12px',
-                            backgroundColor: `${btn.color}20`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: btn.color,
-                            marginBottom: '0.5rem'
-                        }}>
-                            <btn.icon size={24} />
-                        </div>
-                        <div>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>{btn.label}</h3>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Quick access to {btn.label.toLowerCase()} tools.</p>
-                        </div>
-                        <div style={{
-                            marginTop: 'auto',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            color: btn.color
-                        }}>
-                            <span>Open Page</span>
-                            <ArrowRight size={14} />
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-
-            <div className="glass-card" style={{ padding: '2rem' }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Recent Analytics</h2>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px', border: '1px dashed var(--glass-border)', borderRadius: '12px', color: 'var(--text-muted)' }}>
-                    <p>Analytics charts and data visualizations will appear here.</p>
+                            height: '200px',
+                            border: '1px dashed var(--glass-border)',
+                            borderRadius: '12px',
+                            color: 'var(--text-muted)'
+                        }}
+                    >
+                        <p>Analytics charts and data visualizations will appear here.</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </FullPageBackground>
     );
 };
 
