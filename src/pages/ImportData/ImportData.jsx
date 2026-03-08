@@ -1,11 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileInput, Upload, CheckCircle2, XCircle, AlertCircle, Trash2, Eye, EyeOff } from 'lucide-react';
+import { FileInput, Upload, CheckCircle2, XCircle, AlertCircle, Trash2, Eye, EyeOff, Server, Loader2 } from 'lucide-react';
 import FullPageBackground from '../../components/Layout/FullPageBackground';
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 
-const EXPECTED_HEADERS = ['ID', 'Name', 'Program', 'Year', 'Date', 'Time In'];
+const EXPECTED_HEADERS = ['ID', 'Name', 'Program', 'Year'];
 
 // Finds the header row and maps data regardless of the leading empty columns (|||)
 const parseRows = (rawRows) => {
@@ -56,9 +56,11 @@ const parseRows = (rawRows) => {
 
 const StatusBadge = ({ status }) => {
     const map = {
-        success: { bg: 'rgba(16,185,129,0.12)', color: '#10b981', border: 'rgba(16,185,129,0.25)', label: 'Success' },
+        success: { bg: 'rgba(16,185,129,0.12)', color: '#10b981', border: 'rgba(16,185,129,0.25)', label: 'Valid Data' },
+        uploaded: { bg: 'rgba(56,189,248,0.12)', color: '#38bdf8', border: 'rgba(56,189,248,0.25)', label: 'Uploaded' },
         error: { bg: 'rgba(239,68,68,0.12)', color: '#ef4444', border: 'rgba(239,68,68,0.25)', label: 'Error' },
         parsing: { bg: 'rgba(99,102,241,0.12)', color: '#6366f1', border: 'rgba(99,102,241,0.25)', label: 'Parsing…' },
+        uploading: { bg: 'rgba(234,179,8,0.12)', color: '#eab308', border: 'rgba(234,179,8,0.25)', label: 'Uploading…' },
     };
     const s = map[status] || map.parsing;
     return (
@@ -81,7 +83,7 @@ const ImportDataPage = () => {
         const ext = file.name.split('.').pop().toLowerCase();
         const id = `${file.name}-${Date.now()}`;
 
-        setFiles(prev => [...prev, { id, name: file.name, size: file.size, status: 'parsing', data: null, error: null, rowCount: 0 }]);
+        setFiles(prev => [...prev, { id, rawFile: file, name: file.name, size: file.size, status: 'parsing', data: null, error: null, rowCount: 0 }]);
 
         const update = (updates) =>
             setFiles(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
@@ -131,6 +133,32 @@ const ImportDataPage = () => {
         if (previewFile?.id === id) setPreviewFile(null);
     };
 
+    const handleUpload = async (fileObj) => {
+        if (!fileObj.rawFile || fileObj.status === 'uploading') return;
+
+        setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'uploading' } : f));
+
+        const formData = new FormData();
+        formData.append('file', fileObj.rawFile);
+
+        try {
+            const response = await fetch('http://localhost:5000/api/students/import', {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Upload failed');
+            }
+
+            setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'uploaded', error: null } : f));
+            alert(data.message || 'Successfully uploaded and overwritten database list!');
+        } catch (err) {
+            setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'error', error: err.message } : f));
+        }
+    };
+
     const fmtSize = (b) =>
         b < 1024 ? `${b}B` : b < 1048576 ? `${(b / 1024).toFixed(1)}KB` : `${(b / 1048576).toFixed(1)}MB`;
 
@@ -145,7 +173,7 @@ const ImportDataPage = () => {
                         Upload <strong style={{ color: 'var(--text)' }}>.xlsx</strong> or{' '}
                         <strong style={{ color: 'var(--text)' }}>.csv</strong> files with the format:{' '}
                         <code style={{ fontSize: '0.8rem', background: 'rgba(99,102,241,0.15)', color: '#818cf8', padding: '2px 8px', borderRadius: '6px' }}>
-                            |||ID|Name|Program|Year|Date|Time In
+                            |||ID|Name|Program|Year
                         </code>
                     </p>
                 </div>
@@ -245,8 +273,10 @@ const ImportDataPage = () => {
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                 {file.status === 'success' && <CheckCircle2 size={18} style={{ color: '#10b981', flexShrink: 0 }} />}
+                                                {file.status === 'uploaded' && <Server size={18} style={{ color: '#38bdf8', flexShrink: 0 }} />}
                                                 {file.status === 'error' && <XCircle size={18} style={{ color: '#ef4444', flexShrink: 0 }} />}
                                                 {file.status === 'parsing' && <AlertCircle size={18} style={{ color: '#6366f1', flexShrink: 0 }} />}
+                                                {file.status === 'uploading' && <Loader2 size={18} className="animate-spin" style={{ color: '#eab308', flexShrink: 0 }} />}
 
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
@@ -256,14 +286,24 @@ const ImportDataPage = () => {
                                                         <StatusBadge status={file.status} />
                                                     </div>
                                                     <p style={{ fontSize: '0.78rem', color: file.status === 'error' ? '#f87171' : 'var(--text-muted)' }}>
-                                                        {file.status === 'success' && `${file.rowCount} rows imported · ${fmtSize(file.size)}`}
+                                                        {(file.status === 'success' || file.status === 'uploaded') && `${file.rowCount} rows parsed locally · ${fmtSize(file.size)}`}
                                                         {file.status === 'error' && file.error}
                                                         {file.status === 'parsing' && 'Processing file…'}
+                                                        {file.status === 'uploading' && 'Sending to database…'}
                                                     </p>
                                                 </div>
 
-                                                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                <div style={{ display: 'flex', gap: '4px', flexShrink: 0, alignItems: 'center' }}>
                                                     {file.status === 'success' && (
+                                                        <button
+                                                            className="btn-primary"
+                                                            onClick={() => handleUpload(file)}
+                                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', marginRight: '0.5rem' }}
+                                                        >
+                                                            Upload DB
+                                                        </button>
+                                                    )}
+                                                    {(file.status === 'success' || file.status === 'uploaded') && (
                                                         <button title="Preview" onClick={() => setPreviewFile(p => p?.id === file.id ? null : file)}
                                                             style={{ background: 'none', border: 'none', cursor: 'pointer', color: previewFile?.id === file.id ? '#6366f1' : 'var(--text-muted)', padding: '4px' }}>
                                                             {previewFile?.id === file.id ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -342,7 +382,7 @@ const ImportDataPage = () => {
                 </AnimatePresence>
 
             </motion.div>
-        </FullPageBackground>
+        </FullPageBackground >
     );
 };
 
