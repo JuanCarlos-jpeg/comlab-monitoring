@@ -5,6 +5,7 @@ import multer from 'multer';
 import csv from 'csv-parser';
 import * as xlsx from 'xlsx';
 import { Readable } from 'stream';
+import bcrypt from 'bcryptjs';
 import db from './db.js';
 
 dotenv.config();
@@ -139,6 +140,134 @@ app.post('/api/time-in', async (req, res) => {
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'API is running' });
+});
+
+// ─── Staff Login ──────────────────────────────────────────────────────────────
+
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required.' });
+    }
+
+    // Fallback default account (env-configurable) — always available even with empty DB
+    const defaultUser = process.env.DEFAULT_ADMIN_USER || 'admin';
+    const defaultPass = process.env.DEFAULT_ADMIN_PASS || 'admin123';
+    if (username === defaultUser && password === defaultPass) {
+        return res.json({ message: 'Login successful.', user: { id: 0, username: defaultUser } });
+    }
+
+    try {
+        const [rows] = await db.query(
+            'SELECT id, username, password FROM admin_credentials WHERE username = ?',
+            [username]
+        );
+        if (rows.length === 0) {
+            return res.status(401).json({ message: 'Invalid username or password.' });
+        }
+        const match = await bcrypt.compare(password, rows[0].password);
+        if (!match) {
+            return res.status(401).json({ message: 'Invalid username or password.' });
+        }
+        res.json({ message: 'Login successful.', user: { id: rows[0].id, username: rows[0].username } });
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// ─── Admin Credentials (Staff) ────────────────────────────────────────────────
+
+app.get('/api/admin-credentials', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT id, username, created_at FROM admin_credentials ORDER BY id ASC');
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching admin credentials:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+app.post('/api/admin-credentials', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required.' });
+    }
+    try {
+        const hashed = await bcrypt.hash(password, 12);
+        await db.query(
+            'INSERT INTO admin_credentials (username, password) VALUES (?, ?)',
+            [username, hashed]
+        );
+        res.status(201).json({ message: 'Staff account created successfully.' });
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Username already exists.' });
+        }
+        console.error('Error creating admin credential:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+app.delete('/api/admin-credentials/:id', async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM admin_credentials WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Staff not found.' });
+        }
+        res.json({ message: 'Staff account deleted.' });
+    } catch (error) {
+        console.error('Error deleting admin credential:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// ─── Students ─────────────────────────────────────────────────────────────────
+
+app.get('/api/students', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM students ORDER BY id ASC');
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+app.post('/api/students', async (req, res) => {
+    const { id, name, program, year } = req.body;
+    if (!id || !name || !program || !year) {
+        return res.status(400).json({ message: 'ID, name, program, and year are required.' });
+    }
+    if (!/^\d+$/.test(String(id))) {
+        return res.status(400).json({ message: 'Student ID must be numeric.' });
+    }
+    try {
+        await db.query(
+            'INSERT INTO students (id, name, program, year) VALUES (?, ?, ?, ?)',
+            [String(id), name, program, String(year)]
+        );
+        res.status(201).json({ message: 'Student created successfully.' });
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ message: 'Student ID already exists.' });
+        }
+        console.error('Error creating student:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+app.delete('/api/students/:id', async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM students WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Student not found.' });
+        }
+        res.json({ message: 'Student deleted.' });
+    } catch (error) {
+        console.error('Error deleting student:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
 });
 
 const PORT = process.env.PORT || 5000;
