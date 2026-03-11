@@ -171,9 +171,9 @@ const ImportDataPage = () => {
                     <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Import Data</h1>
                     <p style={{ color: 'var(--text-muted)' }}>
                         Upload <strong style={{ color: 'var(--text)' }}>.xlsx</strong> or{' '}
-                        <strong style={{ color: 'var(--text)' }}>.csv</strong> files with the format:{' '}
+                        <strong style={{ color: 'var(--text)' }}>.csv</strong> files that contains the following columns:{' '}
                         <code style={{ fontSize: '0.8rem', background: 'rgba(99,102,241,0.15)', color: '#818cf8', padding: '2px 8px', borderRadius: '6px' }}>
-                            |||ID|Name|Program|Year
+                            ID, Name, Program, Year
                         </code>
                     </p>
                 </div>
