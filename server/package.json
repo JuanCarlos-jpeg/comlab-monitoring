@@ -9,7 +9,10 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "bcryptjs": "^3.0.3",
+=======
+>>>>>>> a6ab9ec (Save my local changes)
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
     "dotenv": "^16.4.5",
