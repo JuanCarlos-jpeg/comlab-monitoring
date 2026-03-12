@@ -176,7 +176,7 @@ const ImportDataPage = () => {
                         Upload <strong style={{ color: 'var(--text)' }}>.xlsx</strong> or{' '}
                         <strong style={{ color: 'var(--text)' }}>.csv</strong> files with the format:{' '}
                         <code style={{ fontSize: '0.8rem', background: 'rgba(99,102,241,0.15)', color: '#818cf8', padding: '2px 8px', borderRadius: '6px' }}>
-                            |||ID|Name|Program|Year
+                            ID|Name|Program|Year
                         </code>
                     </p>
                 </div>
@@ -232,10 +232,10 @@ const ImportDataPage = () => {
                         {/* Column hint */}
                         <div className="glass-card" style={{ padding: '1.25rem' }}>
                             <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Expected Column Order
+                                Required Columns:
                             </p>
                             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                                {['(empty)', '(empty)', '(empty)', ...EXPECTED_HEADERS].map((col, i) => (
+                                {EXPECTED_HEADERS.map((col, i) => (
                                     <span key={i} style={{
                                         fontSize: '0.75rem', padding: '2px 8px', borderRadius: '6px',
                                         background: col.startsWith('(') ? 'rgba(255,255,255,0.04)' : 'rgba(99,102,241,0.15)',
