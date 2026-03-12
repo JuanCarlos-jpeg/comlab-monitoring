@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserPlus, Trash2, X, Eye, EyeOff, ShieldCheck, GraduationCap, CheckCircle, AlertCircle } from 'lucide-react';
 import FullPageBackground from '../../components/Layout/FullPageBackground';
+import { useAuth } from '../../AuthContext';
 
 const API = 'http://localhost:5000/api';
 
@@ -47,8 +48,10 @@ const Toast = ({ msg, type, onDone }) => {
 
 // ─── Floating Add Modal ───────────────────────────────────────────────────────
 const AddModal = ({ onClose, onSuccess }) => {
-    const [userType, setUserType] = useState('staff');
-    const [form, setForm] = useState({ username: '', password: '', id: '', name: '', program: '', year: '' });
+    const { user } = useAuth();
+    // Default to student if staff, otherwise default to staff
+    const [userType, setUserType] = useState(user?.role === 'staff' ? 'student' : 'staff');
+    const [form, setForm] = useState({ username: '', password: '', id: '', name: '', program: '', year: '', role: 'staff' });
     const [showPw, setShowPw] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -64,7 +67,7 @@ const AddModal = ({ onClose, onSuccess }) => {
                 const res = await fetch(`${API}/admin-credentials`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: form.username, password: form.password }),
+                    body: JSON.stringify({ username: form.username, password: form.password, role: form.role, requesterRole: user?.role }),
                 });
                 const data = await res.json();
                 if (!res.ok) { setError(data.message); setLoading(false); return; }
@@ -128,29 +131,31 @@ const AddModal = ({ onClose, onSuccess }) => {
                 </div>
 
                 {/* Radio Type Selector */}
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '1.75rem' }}>
-                    {[
-                        { val: 'staff', label: 'Staff', Icon: ShieldCheck },
-                        { val: 'student', label: 'Student', Icon: GraduationCap },
-                    ].map(({ val, label, Icon }) => (
-                        <label key={val} style={{
-                            flex: 1, display: 'flex', alignItems: 'center', gap: '10px',
-                            padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
-                            background: userType === val ? 'rgba(220,38,38,0.18)' : 'rgba(255,255,255,0.04)',
-                            border: `1px solid ${userType === val ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                            transition: 'all 0.2s',
-                        }}>
-                            <input
-                                type="radio" name="userType" value={val}
-                                checked={userType === val}
-                                onChange={() => { setUserType(val); setError(''); }}
-                                style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }}
-                            />
-                            <Icon size={16} color={userType === val ? '#dc2626' : 'var(--text-muted)'} />
-                            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: userType === val ? 'white' : 'var(--text-muted)' }}>{label}</span>
-                        </label>
-                    ))}
-                </div>
+                {user?.role !== 'staff' && (
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '1.75rem' }}>
+                        {[
+                            { val: 'staff', label: 'Staff Account', Icon: ShieldCheck },
+                            { val: 'student', label: 'Student', Icon: GraduationCap },
+                        ].map(({ val, label, Icon }) => (
+                            <label key={val} style={{
+                                flex: 1, display: 'flex', alignItems: 'center', gap: '10px',
+                                padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
+                                background: userType === val ? 'rgba(220,38,38,0.18)' : 'rgba(255,255,255,0.04)',
+                                border: `1px solid ${userType === val ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                transition: 'all 0.2s',
+                            }}>
+                                <input
+                                    type="radio" name="userType" value={val}
+                                    checked={userType === val}
+                                    onChange={() => { setUserType(val); setError(''); }}
+                                    style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }}
+                                />
+                                <Icon size={16} color={userType === val ? '#dc2626' : 'var(--text-muted)'} />
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem', color: userType === val ? 'white' : 'var(--text-muted)' }}>{label}</span>
+                            </label>
+                        ))}
+                    </div>
+                )}
 
                 {/* Form Fields */}
                 <AnimatePresence mode="wait">
@@ -177,6 +182,25 @@ const AddModal = ({ onClose, onSuccess }) => {
                                         {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                                     </button>
                                 </div>
+                                {user?.role === 'master_admin' && (
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 500 }}>Role</label>
+                                        <select
+                                            value={form.role}
+                                            onChange={e => set('role', e.target.value)}
+                                            style={{
+                                                width: '100%', padding: '10px 14px',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                                borderRadius: '10px', color: 'white', outline: 'none',
+                                                fontSize: '0.9rem', fontFamily: 'Inter, sans-serif'
+                                            }}
+                                        >
+                                            <option value="staff" style={{ background: '#1a1a1a' }}>Staff</option>
+                                            <option value="admin" style={{ background: '#1a1a1a' }}>Admin</option>
+                                        </select>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -233,7 +257,8 @@ const Field = ({ label, value, onChange, placeholder, type = 'text', inputMode }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const UserManagementPage = () => {
-    const [tab, setTab] = useState('staff');
+    const { user } = useAuth();
+    const [tab, setTab] = useState(user?.role === 'staff' ? 'students' : 'staff');
     const [showModal, setShowModal] = useState(false);
     const [staff, setStaff] = useState([]);
     const [students, setStudents] = useState([]);
@@ -244,13 +269,18 @@ const UserManagementPage = () => {
     const showToast = (msg, type = 'success') => setToast({ msg, type });
 
     const fetchStaff = useCallback(async () => {
+        if (user?.role === 'staff') {
+            setLoadingStaff(false);
+            return;
+        }
         setLoadingStaff(true);
         try {
-            const res = await fetch(`${API}/admin-credentials`);
+            const res = await fetch(`${API}/admin-credentials?role=${user?.role || 'staff'}`);
+            if (!res.ok) throw new Error('Failed to load');
             setStaff(await res.json());
         } catch { showToast('Failed to load staff.', 'error'); }
         finally { setLoadingStaff(false); }
-    }, []);
+    }, [user]);
 
     const fetchStudents = useCallback(async () => {
         setLoadingStudents(true);
@@ -265,7 +295,7 @@ const UserManagementPage = () => {
 
     const deleteStaff = async (id) => {
         try {
-            const res = await fetch(`${API}/admin-credentials/${id}`, { method: 'DELETE' });
+            const res = await fetch(`${API}/admin-credentials/${id}?role=${user?.role || 'staff'}`, { method: 'DELETE' });
             const data = await res.json();
             if (!res.ok) { showToast(data.message, 'error'); return; }
             showToast('Staff removed.');
@@ -309,9 +339,9 @@ const UserManagementPage = () => {
                 {/* Tabs */}
                 <div style={{ display: 'flex', gap: '6px', marginBottom: '1.75rem', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '4px', width: 'fit-content', border: '1px solid rgba(255,255,255,0.08)' }}>
                     {[
-                        { key: 'staff', label: 'Staff', Icon: ShieldCheck },
-                        { key: 'students', label: 'Students', Icon: GraduationCap },
-                    ].map(({ key, label, Icon }) => (
+                        { key: 'staff', label: 'Staff Accounts', Icon: ShieldCheck, show: user?.role === 'master_admin' || user?.role === 'admin' },
+                        { key: 'students', label: 'Students', Icon: GraduationCap, show: true },
+                    ].filter(t => t.show).map(({ key, label, Icon }) => (
                         <button
                             key={key}
                             onClick={() => setTab(key)}
@@ -368,26 +398,33 @@ const UserManagementPage = () => {
                                                         <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(220,38,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700 }}>
                                                             {s.username[0].toUpperCase()}
                                                         </div>
-                                                        {s.username}
+                                                        <div>
+                                                            <div style={{ fontWeight: 500 }}>{s.username}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px', textTransform: 'capitalize' }}>{s.role.replace('_', ' ')}</div>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                                                     {new Date(s.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                                                 </td>
                                                 <td style={{ ...tdStyle, textAlign: 'right' }}>
-                                                    <button
-                                                        onClick={() => deleteStaff(s.id)}
-                                                        style={{
-                                                            background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)',
-                                                            borderRadius: '8px', padding: '6px 10px', cursor: 'pointer', color: '#f87171',
-                                                            display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem',
-                                                            transition: 'all 0.2s',
-                                                        }}
-                                                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.25)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.5)'; }}
-                                                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.1)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.2)'; }}
-                                                    >
-                                                        <Trash2 size={13} /> Remove
-                                                    </button>
+                                                    {user?.role === 'master_admin' || (user?.role === 'admin' && s.role === 'staff') ? (
+                                                        <button
+                                                            onClick={() => deleteStaff(s.id)}
+                                                            style={{
+                                                                background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)',
+                                                                borderRadius: '8px', padding: '6px 10px', cursor: 'pointer', color: '#f87171',
+                                                                display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem',
+                                                                transition: 'all 0.2s',
+                                                            }}
+                                                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.25)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.5)'; }}
+                                                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.1)'; e.currentTarget.style.borderColor = 'rgba(220,38,38,0.2)'; }}
+                                                        >
+                                                            <Trash2 size={13} /> Remove
+                                                        </button>
+                                                    ) : (
+                                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.5 }}>Restricted</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

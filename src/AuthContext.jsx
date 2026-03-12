@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
             if (!res.ok) {
                 return { success: false, message: data.message || 'Invalid credentials.' };
             }
-            setUser({ id: data.user.id, name: data.user.username });
+            setUser({ id: data.user.id, name: data.user.username, role: data.user.role });
             return { success: true };
         } catch {
             return { success: false, message: 'Cannot reach server. Is it running?' };
