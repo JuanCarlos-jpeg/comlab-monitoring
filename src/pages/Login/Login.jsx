@@ -89,17 +89,10 @@ const LoginPage = () => {
                 }
             }
         } else {
-            // Staff login — authenticated against admin_credentials via API
-            setIsLoading(true);
-            try {
-                const result = await login(userId, password);
-                if (!result.success) {
-                    setError(result.message || 'Invalid credentials. Please try again.');
-                }
-            } catch {
-                setError('An unexpected error occurred. Please try again.');
-            } finally {
-                setIsLoading(false);
+            // Staff login
+            const success = login(userId, password);
+            if (!success) {
+                setError('Invalid credentials. Please try again.');
             }
         }
     };

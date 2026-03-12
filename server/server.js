@@ -51,11 +51,12 @@ app.post('/api/students/import', upload.single('file'), async (req, res) => {
             return res.status(400).json({ message: 'Uploaded file is empty' });
         }
 
-        // Validate Headers by normalizing keys from the first row
+        // Validate Headers by normalizing keys from the first row and trimming values
         const normalizedData = studentsData.map(row => {
             const normalizedRow = {};
             for (const key in row) {
-                normalizedRow[key.trim()] = row[key];
+                // Ensure values are nicely trimmed, specifically vital for keys like ID
+                normalizedRow[key.trim()] = typeof row[key] === 'string' ? row[key].trim() : String(row[key] || '').trim();
             }
             return normalizedRow;
         });
@@ -75,12 +76,9 @@ app.post('/api/students/import', upload.single('file'), async (req, res) => {
         try {
             await connection.beginTransaction();
 
-            // 1. Delete students who DO NOT have any time records
-            // We use a subquery to find students with logs, and delete those not in the subquery
-            await connection.query(`
-                DELETE FROM students 
-                WHERE id NOT IN (SELECT DISTINCT student_id FROM time_logs)
-            `);
+            // 1. Clear existing time_logs and students completely
+            await connection.query(`DELETE FROM time_logs`);
+            await connection.query(`DELETE FROM students`);
 
             // 2. Upsert the new students from the uploaded file
             for (const student of normalizedData) {
