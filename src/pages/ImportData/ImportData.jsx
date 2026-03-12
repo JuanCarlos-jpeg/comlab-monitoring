@@ -136,6 +136,9 @@ const ImportDataPage = () => {
     const handleUpload = async (fileObj) => {
         if (!fileObj.rawFile || fileObj.status === 'uploading') return;
 
+        const confirmOverwrite = window.confirm("You are about to overwrite the students list, this includes deleting everything in the time_logs. Please export them first before proceeding.");
+        if (!confirmOverwrite) return;
+
         setFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'uploading' } : f));
 
         const formData = new FormData();
