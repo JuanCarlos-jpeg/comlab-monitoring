@@ -136,6 +136,16 @@ app.post('/api/time-in', async (req, res) => {
     }
 });
 
+app.get('/api/time-logs', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM time_logs ORDER BY date DESC, time_in DESC');
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching time logs:', error);
+        res.status(500).json({ message: 'Server error fetching time logs', error: error.message });
+    }
+});
+
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'API is running' });
 });
