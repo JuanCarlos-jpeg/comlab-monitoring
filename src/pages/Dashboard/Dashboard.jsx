@@ -1,10 +1,56 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, FileInput, FileOutput, ArrowRight } from 'lucide-react';
+import { LayoutDashboard, Users, FileInput, FileOutput, ArrowRight, LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
 import FullPageBackground from '../../components/Layout/FullPageBackground';
+import StatCard from '../../components/Dashboard/StatCard';
+import BarChart from '../../components/Dashboard/BarChart';
+import TimeLogTable from '../../components/Dashboard/TimeLogTable';
 
 const DashboardPage = () => {
     const navigate = useNavigate();
+    const [timeLogs, setTimeLogs] = useState([]);
+    const [stats, setStats] = useState({
+        totalLogins: 0,
+        uniqueUsers: 0,
+    });
+    const [loginsByProgram, setLoginsByProgram] = useState([]);
+
+    useEffect(() => {
+        const fetchTimeLogs = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/time-logs');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                setTimeLogs(data);
+                processAnalytics(data);
+            } catch (error) {
+                console.error('Error fetching time logs:', error);
+            }
+        };
+
+        fetchTimeLogs();
+    }, []);
+
+    const processAnalytics = (data) => {
+        if (!data || data.length === 0) return;
+
+        const totalLogins = data.length;
+        const uniqueUsers = new Set(data.map(log => log.id)).size;
+        setStats({ totalLogins, uniqueUsers });
+
+        const programCounts = data.reduce((acc, log) => {
+            acc[log.program] = (acc[log.program] || 0) + 1;
+            return acc;
+        }, {});
+        const programData = Object.keys(programCounts).map(program => ({
+            label: program,
+            value: programCounts[program]
+        }));
+        setLoginsByProgram(programData);
+    };
 
     const navButtons = [
         { label: 'Dashboard', path: '/dashboard', color: '#6366f1', icon: LayoutDashboard },
@@ -68,7 +114,6 @@ const DashboardPage = () => {
                             >
                                 <btn.icon size={24} />
                             </div>
-
                             <div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.25rem' }}>
                                     {btn.label}
@@ -77,7 +122,6 @@ const DashboardPage = () => {
                                     Quick access to {btn.label.toLowerCase()} tools.
                                 </p>
                             </div>
-
                             <div
                                 style={{
                                     marginTop: 'auto',
@@ -100,18 +144,26 @@ const DashboardPage = () => {
                     <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>
                         Recent Analytics
                     </h2>
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: '200px',
-                            border: '1px dashed var(--glass-border)',
-                            borderRadius: '12px',
-                            color: 'var(--text-muted)'
-                        }}
-                    >
-                        <p>Analytics charts and data visualizations will appear here.</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                        <StatCard
+                            title="Total Logins"
+                            value={stats.totalLogins}
+                            icon={<LogIn size={20} />}
+                            color="#38bdf8"
+                        />
+                        <StatCard
+                            title="Unique Users"
+                            value={stats.uniqueUsers}
+                            icon={<Users size={20} />}
+                            color="#6366f1"
+                        />
+                        <BarChart
+                            title="Logins by Program"
+                            data={loginsByProgram}
+                            color="var(--accent)"
+                            chartHeight="320px"
+                        />
+                        <TimeLogTable data={timeLogs} />
                     </div>
                 </div>
             </div>
