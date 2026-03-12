@@ -27,7 +27,7 @@ If you are developing a production application, we recommend using TypeScript wi
 4. Run `npm run dev` in `../` to start the client
 
 ## Default Admin Account
-
 This is for deployment and for setting up the credentials. DELETE AFTER DEPLOYMENT
-Username: `admin`
-Password: `admin123`
+
+Username: `mapua`
+Password: `vivamapua@1925`
